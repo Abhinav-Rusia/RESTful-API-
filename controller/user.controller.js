@@ -2,6 +2,7 @@
 import '../models/connection.js';
 import jwt from 'jsonwebtoken';
 import randomString from 'randomstring';
+import url from 'url'
 
 import UserSchemaModel from '../models/user.model.js'
 
@@ -31,5 +32,32 @@ export const login = async (req, res) => {
     }
     else {
         res.status(401).json({ "error": "Unauthorized or tokken not found" })
+    }
+}
+
+export const fetch = async (req, res) => {
+    let userObj = url.parse(req.url, true).query;
+    // console.log(userObj);
+    let userList = await UserSchemaModel.find(userObj)
+    // console.log(userList);
+    try {
+        res.status(200).json({ "userList": userList })
+    } catch (error) {
+        res.status(500).json({ "message": error.message })
+    }
+}
+
+export const update = async (req, res) => {
+    try {
+        let { _id } = req.params;
+        let updateFields = req.body
+        let updatedUser = await UserSchemaModel.findByIdAndUpdate(_id, updateFields, { new: true })
+        if (!updatedUser) {
+            res.status(404).json({ "message": "User not found" })
+        }
+        res.status(200).json({ "message": "User updated successfully" })
+
+    } catch (error) {
+        res.status(500).json({ "message": error.message })
     }
 }
