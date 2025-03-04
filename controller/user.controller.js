@@ -2,7 +2,6 @@
 import '../models/connection.js';
 import jwt from 'jsonwebtoken';
 import randomString from 'randomstring';
-import url from 'url'
 
 import UserSchemaModel from '../models/user.model.js'
 
@@ -66,6 +65,7 @@ export const updateById = async (req, res) => {
 export const updateByCondition = async (req, res) => {
     try {
         let { condition, updateFields } = req.body
+
         let updatedUser = await UserSchemaModel.findOneAndUpdate(condition, updateFields, { new: true })
         if (!updatedUser) {
             return res.status(404).json({ "message": "User not found" })
