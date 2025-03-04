@@ -36,24 +36,25 @@ export const login = async (req, res) => {
 }
 
 export const fetch = async (req, res) => {
-    let userObj = url.parse(req.url, true).query;
-    // console.log(userObj);
-    let userList = await UserSchemaModel.find(userObj)
-    // console.log(userList);
+
     try {
+        let userObj = req.query
+
+        let userList = await UserSchemaModel.find(userObj)
+
         res.status(200).json({ "userList": userList })
     } catch (error) {
         res.status(500).json({ "message": error.message })
     }
 }
 
-export const update = async (req, res) => {
+export const updateById = async (req, res) => {
     try {
         let { _id } = req.params;
         let updateFields = req.body
         let updatedUser = await UserSchemaModel.findByIdAndUpdate(_id, updateFields, { new: true })
         if (!updatedUser) {
-            res.status(404).json({ "message": "User not found" })
+            return res.status(404).json({ "message": "User not found" })
         }
         res.status(200).json({ "message": "User updated successfully" })
 
@@ -61,3 +62,50 @@ export const update = async (req, res) => {
         res.status(500).json({ "message": error.message })
     }
 }
+
+export const updateByCondition = async (req, res) => {
+    try {
+        let { condition, updateFields } = req.body
+        let updatedUser = await UserSchemaModel.findOneAndUpdate(condition, updateFields, { new: true })
+        if (!updatedUser) {
+            return res.status(404).json({ "message": "User not found" })
+        }
+        res.status(200).json({ "message": "User updated successfully" })
+    } catch (error) {
+        res.status(500).json({ "message": error.message })
+    }
+}
+
+export const deleteById = async (req, res) => {
+    try {
+        let { _id } = req.params
+
+        let deletedUser = await UserSchemaModel.findByIdAndDelete(_id)
+
+        if (!deletedUser) {
+            return res.status(404).json({ "message": "User not found" })
+        }
+        res.status(200).json({ "message": "User deleted successfully" })
+    } catch (error) {
+        res.status(500).json({ "message": error.message })
+    }
+}
+
+export const deleteByCondition = async (req, res) => {
+    try {
+        if (!req.body || !req.body.condition) {
+            return res.status(400).json({ "message": "Invalid request. Condition is required." });
+        }
+
+        let deletedUser = await UserSchemaModel.findOneAndDelete(req.body.condition);
+
+        if (!deletedUser) {
+            return res.status(404).json({ "message": "User not found" });
+        }
+
+        res.status(200).json({ "message": "User deleted successfully" });
+
+    } catch (error) {
+        res.status(500).json({ "message": error.message });
+    }
+};
